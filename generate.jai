@@ -46,8 +46,6 @@ generate_bindings :: (args: []string) -> bool {
             success = build_cpp_static_lib("windows/bin/x64/libtree-sitter", ..src_files, extra=.[
                 tprint("/I%", INCLUDE_DIRS[0]),
                 tprint("/I%", INCLUDE_DIRS[1]),
-                "/TC",
-                "/O2",
             ]);
 
         } else #if OS == .LINUX {
@@ -67,7 +65,7 @@ generate_bindings :: (args: []string) -> bool {
     {
         using opts;
 
-        array_add(*include_paths, ..INCLUDE_DIRS);
+        // array_add(*include_paths, ..INCLUDE_DIRS);
         array_add(*libraries, .{filename="libtree-sitter"});
 
         #if OS == .WINDOWS {
