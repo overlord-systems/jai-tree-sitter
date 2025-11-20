@@ -12,6 +12,7 @@ build :: () {
     }
 }
 
+// Current sources are from commit: https://github.com/tree-sitter/tree-sitter/tree/120f74723e694be4dc2f0033e01b24350dd73f19
 SRC_PATH :: "src/tree-sitter/lib/src/lib.c";
 INCLUDE_DIRS :: string.["src/tree-sitter/lib/src", "src/tree-sitter/lib/include"];
 
@@ -65,7 +66,8 @@ generate_bindings :: (args: []string) -> bool {
     {
         using opts;
 
-        // array_add(*include_paths, ..INCLUDE_DIRS);
+        array_add(*source_files, SRC_PATH);
+        array_add(*include_paths, ..INCLUDE_DIRS);
         array_add(*libraries, .{filename="libtree-sitter"});
 
         #if OS == .WINDOWS {
@@ -74,7 +76,6 @@ generate_bindings :: (args: []string) -> bool {
                 assert("CPU=% isn't currently supported. You might be able to add support for it though!", CPU);
             }
 
-            strip_flags = 0;
             output_filename = "windows/windows.jai";
             array_add(*library_search_paths, "windows/bin/x64");
 
@@ -82,7 +83,6 @@ generate_bindings :: (args: []string) -> bool {
             generate_library_declarations = false;
 
         } else #if OS == .LINUX {
-            strip_flags = 0;
             output_filename = "linux/linux.jai";
             array_add(*library_search_paths, "linux/bin");
 
@@ -90,7 +90,6 @@ generate_bindings :: (args: []string) -> bool {
             generate_library_declarations = false;
 
         } /*else #if OS == .MACOS {
-            strip_flags = 0;
             output_filename = "macos/macos.jai";
         }*/ else {
             assert(false, "this OS is currently unsupported. You might be able to add support for it though!");
