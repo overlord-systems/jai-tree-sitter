@@ -1,0 +1,4 @@
+.build/
+*.pdb
+*.rdi
+*.exe
