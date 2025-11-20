@@ -1,7 +1,7 @@
 //
 // This file was auto-generated using the following command:
 //
-// jai generate.jai
+// jai generate.jai - -compile
 //
 
 
@@ -94,7 +94,7 @@ TSDecodeFunction :: #type (_string: *u8, length: u32, code_point: *s32) -> u32 #
 // Deprecated alias to be removed in ABI 16
 DecodeFunction :: TSDecodeFunction;
 
-TSInputEncoding :: enum s32 {
+TSInputEncoding :: enum u32 {
     UTF8    :: 0;
     UTF16LE :: 1;
     UTF16BE :: 2;
@@ -106,7 +106,7 @@ TSInputEncoding :: enum s32 {
     TSInputEncodingCustom  :: Custom;
 }
 
-TSSymbolType :: enum s32 {
+TSSymbolType :: enum u32 {
     Regular   :: 0;
     Anonymous :: 1;
     Supertype :: 2;
@@ -148,7 +148,7 @@ TSParseOptions :: struct {
     progress_callback: #type (state: *TSParseState) -> bool #c_call;
 }
 
-TSLogType :: enum s32 {
+TSLogType :: enum u32 {
     Parse :: 0;
     Lex   :: 1;
 
@@ -187,7 +187,7 @@ TSQueryCapture :: struct {
     index: u32;
 }
 
-TSQuantifier :: enum s32 {
+TSQuantifier :: enum u32 {
     Zero       :: 0;
     ZeroOrOne  :: 1;
     ZeroOrMore :: 2;
@@ -208,7 +208,7 @@ TSQueryMatch :: struct {
     captures:      *TSQueryCapture;
 }
 
-TSQueryPredicateStepType :: enum s32 {
+TSQueryPredicateStepType :: enum u32 {
     Done    :: 0;
     Capture :: 1;
     String  :: 2;
@@ -223,7 +223,7 @@ TSQueryPredicateStep :: struct {
     value_id: u32;
 }
 
-TSQueryError :: enum s32 {
+TSQueryError :: enum u32 {
     None      :: 0;
     Syntax    :: 1;
     NodeType  :: 2;
@@ -1287,7 +1287,7 @@ wasm_engine_t :: struct {}
 TSWasmEngine :: wasm_engine_t;
 TSWasmStore :: struct {}
 
-TSWasmErrorKind :: enum s32 {
+TSWasmErrorKind :: enum u32 {
     None        :: 0;
     Parse       :: 1;
     Compile     :: 2;
@@ -1395,7 +1395,7 @@ TSLexer :: struct {
     log:                        #type (unknown0: *TSLexer, unknown1: *u8, __args: ..Any) -> void #c_call;
 }
 
-TSParseActionType :: enum s32 {
+TSParseActionType :: enum u32 {
     Shift   :: 0;
     Reduce  :: 1;
     Accept  :: 2;
@@ -1529,7 +1529,7 @@ SubtreeInlineData :: struct {
     parse_state:     u16;
     padding_columns: u8;
     __bitfield:      u8;
-    /*
+    /* 
         padding_rows: u8; /* 4 bits */
         lookahead_bytes: u8; /* 4 bits */;
     */
@@ -1711,7 +1711,7 @@ TreeCursor :: struct {
     root_alias_symbol: TSSymbol;
 }
 
-TreeCursorStep :: enum s32 {
+TreeCursorStep :: enum u32 {
     None    :: 0;
     Hidden  :: 1;
     Visible :: 2;
@@ -1786,7 +1786,7 @@ Iterator :: struct {
     prev_external_token: Subtree;
 }
 
-IteratorComparison :: enum s32 {
+IteratorComparison :: enum u32 {
     Differs   :: 0;
     MayDiffer :: 1;
     Matches   :: 2;
@@ -2123,7 +2123,7 @@ ErrorStatus :: struct {
     is_in_error:        bool;
 }
 
-ErrorComparison :: enum s32 {
+ErrorComparison :: enum u32 {
     TakeLeft    :: 0;
     PreferLeft  :: 1;
     None        :: 2;
@@ -2329,7 +2329,7 @@ QueryState :: struct {
     step_index:                   u16;
     pattern_index:                u16;
     consumed_capture_count:       u16; /* 12 bits */
-    seeking_immediate_match:      bool; /* 1 bits */
+    seeking_immediate_match:      bool #align 1; /* 1 bits */
     has_in_progress_alternatives: bool #align 1; /* 1 bits */
     dead:                         bool #align 1; /* 1 bits */
     needs_parent:                 bool #align 1; /* 1 bits */
@@ -2376,7 +2376,7 @@ AnalysisStateEntry :: struct {
     parent_symbol: TSSymbol;
     child_index:   u16;
     field_id:      TSFieldId; /* 15 bits */
-    done:          bool; /* 1 bits */
+    done:          bool #align 1; /* 1 bits */
 }
 
 AnalysisState :: struct {
@@ -2586,7 +2586,7 @@ StackNodeArray :: struct {
     capacity: u32;
 }
 
-StackStatus :: enum s32 {
+StackStatus :: enum u32 {
     Active :: 0;
     Paused :: 1;
     Halted :: 2;
@@ -2623,7 +2623,7 @@ Stack :: struct {
 }
 
 StackAction :: u32;
-StackAction_1 :: enum s32 {
+StackAction_1 :: enum u32 {
     None :: 0;
     Stop :: 1;
     Pop  :: 2;
@@ -2635,20 +2635,10 @@ StackAction_1 :: enum s32 {
 
 StackCallback :: #type (unknown0: *void, unknown1: *StackIterator) -> StackAction #c_call;
 
-pop_count_callback :: (payload: *void, iterator: *StackIterator) -> StackAction #foreign libtree_sitter;
-
-pop_pending_callback :: (payload: *void, iterator: *StackIterator) -> StackAction #foreign libtree_sitter;
-
-pop_error_callback :: (payload: *void, iterator: *StackIterator) -> StackAction #foreign libtree_sitter;
-
-pop_all_callback :: (payload: *void, iterator: *StackIterator) -> StackAction #foreign libtree_sitter;
-
 SummarizeStackSession :: struct {
     summary:   *StackSummary;
     max_depth: u32;
 }
-
-summarize_stack_callback :: (payload: *void, iterator: *StackIterator) -> StackAction #foreign libtree_sitter;
 
 Edit :: struct {
     start:   Length;
@@ -2681,7 +2671,7 @@ ts_tree_cursor_goto_sibling_internal :: (_self: *TSTreeCursor, advance: #type (u
 
 ts_tree_cursor_goto_previous_sibling_internal :: (_self: *TSTreeCursor) -> TreeCursorStep #foreign libtree_sitter;
 
-_ts_dup :: (handle: HANDLE) -> s32 #foreign libtree_sitter;
+_ts_dup :: (file_descriptor: s32) -> s32 #foreign libtree_sitter;
 
 #scope_file
 

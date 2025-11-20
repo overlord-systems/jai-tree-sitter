@@ -57,7 +57,10 @@ generate_bindings :: (args: []string) -> bool {
 
             make_directory_if_it_does_not_exist("linux/bin/x64", recursive=true);
 
-            success = build_cpp_static_lib("linux/bin/x64/libtree-sitter.a", ..src_files);
+            success = build_cpp_static_lib("linux/bin/x64/libtree-sitter", ..src_files, extra=.[
+                tprint("-I%", INCLUDE_DIRS[0]),
+                tprint("-I%", INCLUDE_DIRS[1]),
+            ]);
         } else {
             assert(false, "this OS is currently unsupported. You might be able to add support for it though!");
         }
@@ -83,8 +86,13 @@ generate_bindings :: (args: []string) -> bool {
             generate_library_declarations = false;
 
         } else #if OS == .LINUX {
+
+            #if CPU != .X64 {
+                assert("CPU=% isn't currently supported. You might be able to add support for it though!", CPU);
+            }
+
             output_filename = "linux/linux.jai";
-            array_add(*library_search_paths, "linux/bin");
+            array_add(*library_search_paths, "linux/bin/x64");
 
             footer = FOOTER_LINUX;
             generate_library_declarations = false;
