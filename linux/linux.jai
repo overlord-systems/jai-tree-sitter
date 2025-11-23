@@ -1,7 +1,7 @@
 //
 // This file was auto-generated using the following command:
 //
-// jai generate.jai
+// jai generate.jai - -compile
 //
 
 
@@ -1276,4 +1276,4 @@ ts_set_allocator :: (new_malloc: #type (unknown0: u64) -> *void #c_call, new_cal
 
 #scope_file
 
-libtree_sitter :: #library,no_dll "bin/x64/libtree_sitter";
+libtree_sitter :: #library,no_dll "bin/x64/libtree-sitter";

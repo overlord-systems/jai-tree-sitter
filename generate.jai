@@ -28,9 +28,15 @@ ENUMS_TO_OMIT :: string.[
 generate_bindings :: (args: []string) -> bool {
 
     compile := array_find(args, "-compile");
+    compile_json := array_find(args, "-compile_json");
 
     if compile {
         success := compile_tree_sitter();
+        if !success return false;
+    }
+
+    if compile_json {
+        success := compile_json_lang();
         if !success return false;
     }
 
@@ -113,7 +119,59 @@ compile_tree_sitter :: () -> ok: bool {
         assert(false, "this OS is currently unsupported. You might be able to add support for it though!");
     }
 
-    return true;
+    return success;
+}
+
+compile_json_lang :: () -> ok: bool {
+
+    BUILD_LANGUAGES_SRC_PATHS :: string.["src/languages/json/src/parser.c"];
+    BUILD_LANGUAGES_INCLUDE_DIRS :: string.["src/languages/json/src"];
+
+    BINDINGS  :: #string EOF
+tree_sitter_json :: () -> *TSLanguage #foreign libtree_sitter_json;
+
+libtree_sitter_json :: #library,no_dll "bin/x64/libtree-sitter-json";
+    EOF
+
+    success := false;
+
+    src_files: [..]string;
+    array_add(*src_files, ..BUILD_LANGUAGES_SRC_PATHS);
+
+    includes: [..]string;
+    for BUILD_LANGUAGES_INCLUDE_DIRS {
+        tprint("/I%", it);
+    }
+
+    #if OS == .WINDOWS {
+
+        #if CPU != .X64 {
+            assert("CPU=% isn't currently supported. You might be able to add support for it though!", CPU);
+        }
+
+        make_directory_if_it_does_not_exist("windows/languages/json/bin/x64", recursive=true);
+
+        success = build_cpp_static_lib("windows/languages/json/bin/x64/libtree-sitter-json", ..src_files, extra=includes);
+
+        success &&= write_entire_file("windows/languages/json/windows.jai", BINDINGS);
+
+    } else #if OS == .LINUX {
+
+        #if CPU != .X64 {
+            assert("CPU=% isn't currently supported. You might be able to add support for it though!", CPU);
+        }
+
+        make_directory_if_it_does_not_exist("linux/languages/json/bin/x64", recursive=true);
+
+        success = build_cpp_static_lib("linux/languages/json/bin/x64/libtree-sitter-json", ..src_files, extra=includes);
+
+        success &&= write_entire_file("linux/languages/json/linux.jai", BINDINGS);
+
+    } else {
+        assert(false, "this OS is currently unsupported. You might be able to add support for it though!");
+    }
+
+    return success;
 }
 
 tree_sitter_visitor :: (decl: *Declaration, parent_decl: *Declaration) -> Declaration_Visit_Result {
@@ -131,9 +189,9 @@ tree_sitter_visitor :: (decl: *Declaration, parent_decl: *Declaration) -> Declar
 #import "File";
 
 FOOTER_WIN :: #string END
-libtree_sitter :: #library,no_dll "bin/x64/libtree_sitter";
+libtree_sitter :: #library,no_dll "bin/x64/libtree-sitter";
 END
 
 FOOTER_LINUX :: #string END
-libtree_sitter :: #library,no_dll "bin/x64/libtree_sitter";
+libtree_sitter :: #library,no_dll "bin/x64/libtree-sitter";
 END
