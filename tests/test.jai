@@ -1,7 +1,44 @@
 #import "Basic";
 #import,file "../module.jai";
 
+// These alloc procs perhaps aren't prod ready.
+// ts_calloc does no alignment work, which might be expected by tree-sitter, and
+// I am not sure push_context is safe for multi-threaded work (e.g., alloc in one thread and free in another).
+ts_malloc :: (size: u64) -> *void #c_call {
+    push_context {
+        return alloc(size.(s64));
+    }
+}
+
+ts_calloc :: (count: u64, size: u64) -> *void #c_call {
+    // Calloc expects zeroed data
+    push_context {
+        data := alloc((count * size).(s64));
+        if data then memset(data, 0, size.(s64));
+        return data;
+    }
+}
+
+ts_realloc :: (data: *void, size: u64) -> *void #c_call {
+    push_context {
+        return realloc(data, size.(s64), 0);
+    }
+}
+
+ts_free :: (data: *void) #c_call {
+    push_context {
+        free(data);
+    }
+}
+
 main :: () {
+
+    ts_set_allocator(
+        ts_malloc,
+        ts_calloc,
+        ts_realloc,
+        ts_free,
+    );
 
     parser := ts_parser_new();
 
@@ -64,9 +101,62 @@ main :: () {
     tree_s_expr := to_string(ts_node_string(root_node));
     print("syntax tree = %\n", tree_s_expr);
 
-    // Free stuff
-    free(tree_s_expr);
-    ts_tree_delete(tree);
+    // Test querying
+    json_highlights_query := #string EOF
+(pair
+  key: (_) @string.special.key)
+
+(string) @string
+
+(number) @number
+
+[
+  (null)
+  (true)
+  (false)
+] @constant.builtin
+
+(escape_sequence) @escape
+
+(comment) @comment
+    EOF;
+
+    query_error_offset: u32;
+    query_error: TSQueryError;
+    query := ts_query_new(json_lang, json_highlights_query.data, json_highlights_query.count.(u32), *query_error_offset, *query_error);
+    assert(query != null, "ts_query_new returned a null query");
+
+    query_cursor := ts_query_cursor_new();
+    ts_query_cursor_exec(query_cursor, query, root_node);
+
+    query_match_index: u32;
+    query_match: TSQueryMatch;
+    print("\nstarting to print query captures:\n");
+    while ts_query_cursor_next_capture(query_cursor, *query_match, *query_match_index) {
+
+        captures: []TSQueryCapture;
+        captures.data = query_match.captures;
+        captures.count = query_match.capture_count;
+
+        for cap: captures {
+
+            node_type := to_string(ts_node_type(cap.node));
+            start_point := ts_node_start_point(cap.node);
+            end_point := ts_node_end_point(cap.node);
+
+            print("\ncapture(%,%): type=%; start_point=%; end_point=%\n",
+                query_match_index,
+                it_index,
+                node_type,
+                start_point,
+                end_point,
+            );
+        }
+    }
+    print("\nfinished printing query captures\n");
+
+    // Free allocs
+    ts_free(tree_s_expr.data);
     ts_tree_delete(tree);
     ts_parser_delete(parser);
 
