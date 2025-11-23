@@ -64,5 +64,11 @@ main :: () {
     tree_s_expr := to_string(ts_node_string(root_node));
     print("syntax tree = %\n", tree_s_expr);
 
+    // Free stuff
+    free(tree_s_expr);
+    ts_tree_delete(tree);
+    ts_tree_delete(tree);
+    ts_parser_delete(parser);
+
     print("Tests successful!\n");
 }
