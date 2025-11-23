@@ -1529,7 +1529,7 @@ SubtreeInlineData :: struct {
     parse_state:     u16;
     padding_columns: u8;
     __bitfield:      u8;
-    /*
+    /* 
         padding_rows: u8; /* 4 bits */
         lookahead_bytes: u8; /* 4 bits */;
     */
@@ -1726,11 +1726,6 @@ ts_tree_cursor_init :: (self: *TreeCursor, node: TSNode) -> void #foreign libtre
 // Private - Get various facts about the current node that are needed
 // when executing tree queries.
 ts_tree_cursor_current_status :: (_self: *TSTreeCursor, field_id: *TSFieldId, has_later_siblings: *bool, has_later_named_siblings: *bool, can_have_later_siblings_with_this_field: *bool, supertypes: *TSSymbol, supertype_count: *u32) -> void #foreign libtree_sitter;
-
-// TSTreeCursor - walking the tree
-ts_tree_cursor_goto_first_child_internal :: (_self: *TSTreeCursor) -> TreeCursorStep #foreign libtree_sitter;
-
-ts_tree_cursor_goto_next_sibling_internal :: (_self: *TSTreeCursor) -> TreeCursorStep #foreign libtree_sitter;
 
 ts_tree_cursor_parent_node :: (_self: *TSTreeCursor) -> TSNode #foreign libtree_sitter;
 
@@ -2674,12 +2669,6 @@ CursorChildIterator :: struct {
     descendant_index:       u32;
     alias_sequence:         *TSSymbol;
 }
-
-ts_tree_cursor_goto_last_child_internal :: (_self: *TSTreeCursor) -> TreeCursorStep #foreign libtree_sitter;
-
-ts_tree_cursor_goto_sibling_internal :: (_self: *TSTreeCursor, advance: #type (unknown0: *CursorChildIterator, unknown1: *TreeCursorEntry, unknown2: *bool) -> bool #c_call) -> TreeCursorStep #foreign libtree_sitter;
-
-ts_tree_cursor_goto_previous_sibling_internal :: (_self: *TSTreeCursor) -> TreeCursorStep #foreign libtree_sitter;
 
 _ts_dup :: (handle: HANDLE) -> s32 #foreign libtree_sitter;
 

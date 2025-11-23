@@ -103,14 +103,26 @@ generate_bindings :: (args: []string) -> bool {
             assert(false, "this OS is currently unsupported. You might be able to add support for it though!");
         }
 
+        visitor = tree_sitter_visitor;
         generate_compile_time_struct_checks = false;
     }
 
     return generate_bindings(opts, output_filename);
 }
 
+tree_sitter_visitor :: (decl: *Declaration, parent_decl: *Declaration) -> Declaration_Visit_Result {
+
+    if contains(decl.name, "_internal") {
+        decl.decl_flags |= .OMIT_FROM_OUTPUT;
+        return .STOP;
+    }
+
+    return .RECURSE;
+}
+
 #scope_file
 
+#import "String";
 #import "Basic";
 #import "Compiler";
 #import "BuildCpp";
