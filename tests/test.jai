@@ -156,8 +156,10 @@ main :: () {
 
     // Free allocs
     ts_free(tree_s_expr.data);
+    ts_query_delete(query);
+    ts_query_cursor_delete(query_cursor);
     ts_tree_delete(tree);
     ts_parser_delete(parser);
 
-    print("Tests successful!\n");
+    print("\nTests successful!\n");
 }
