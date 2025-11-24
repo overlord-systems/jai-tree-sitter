@@ -13,8 +13,9 @@ ts_malloc :: (size: u64) -> *void #c_call {
 ts_calloc :: (count: u64, size: u64) -> *void #c_call {
     // Calloc expects zeroed data
     push_context {
-        data := alloc((count * size).(s64));
-        if data then memset(data, 0, size.(s64));
+        total_bytes := (count * size).(s64);
+        data := alloc(total_bytes);
+        if data then memset(data, 0, total_bytes);
         return data;
     }
 }
