@@ -4,7 +4,7 @@ Jai bindings for Tree-sitter.
 
 This repo compiles tree sitter static libraries for Windows and Linux (Mac PRs welcome!), and generates jai bindings.
 
-Libraries are compiled from the included source, which is from this Tree-Sitter commit: <https://github.com/tree-sitter/tree-sitter/tree/120f74723e694be4dc2f0033e01b24350dd73f19>.
+Libraries are compiled from the included source, which is from [this](https://github.com/tree-sitter/tree-sitter/tree/120f74723e694be4dc2f0033e01b24350dd73f19) Tree-Sitter commit.
 
 To generate bindings run `jai generate.jai`.
 To compile the static binaries run `jai generate - -compile`
