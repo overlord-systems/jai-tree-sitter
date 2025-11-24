@@ -1,9 +1,7 @@
 #import "Basic";
 #import,file "../module.jai";
 
-// These alloc procs perhaps aren't prod ready.
-// ts_calloc does no alignment work, which might be expected by tree-sitter, and
-// I am not sure push_context is safe for multi-threaded work (e.g., alloc in one thread and free in another).
+// These alloc procs perhaps aren't prod ready...or perhaps they are.
 ts_malloc :: (size: u64) -> *void #c_call {
     push_context {
         return alloc(size.(s64));
