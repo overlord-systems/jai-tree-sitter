@@ -21,6 +21,7 @@ Bindings are placed in `OS/languages/LANG_NAME/OS.jai` (e.g., `windows/languages
 
 Currently included languages:
 
+- Go
 - JSON
 
 Which languages are loaded is controlled by a module parameter (e.g., `LOAD_JSON_LANG=true`).

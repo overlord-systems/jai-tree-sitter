@@ -1,7 +1,7 @@
 //
 // This file was auto-generated using the following command:
 //
-// jai generate.jai - -compile_json
+// jai generate.jai - -compile_go
 //
 
 
