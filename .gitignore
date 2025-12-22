@@ -2,3 +2,4 @@
 *.pdb
 *.rdi
 *.exe
+tests/test
