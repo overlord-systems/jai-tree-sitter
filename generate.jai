@@ -30,6 +30,7 @@ generate_bindings :: (args: []string) -> bool {
     compile := array_find(args, "-compile");
     compile_json := array_find(args, "-compile_json");
     compile_go := array_find(args, "-compile_go");
+    compile_jai := array_find(args, "-compile_jai");
 
     if compile {
         success := compile_tree_sitter();
@@ -43,6 +44,11 @@ generate_bindings :: (args: []string) -> bool {
 
     if compile_go {
         success := compile_go_lang();
+        if !success return false;
+    }
+
+    if compile_jai {
+        success := compile_jai_lang();
         if !success return false;
     }
 
@@ -224,6 +230,59 @@ libtree_sitter_go :: #library,no_dll "bin/x64/libtree-sitter-go";
         success = build_cpp_static_lib("linux/languages/go/bin/x64/libtree-sitter-go", ..src_files, extra=includes);
 
         success &&= write_entire_file("linux/languages/go/linux.jai", BINDINGS);
+
+    } else {
+        assert(false, "this OS is currently unsupported. You might be able to add support for it though!");
+    }
+
+    return success;
+}
+
+compile_jai_lang :: () -> ok: bool {
+
+    BUILD_LANGUAGES_SRC_PATHS :: string.["src/languages/jai/src/parser.c"];
+    BUILD_LANGUAGES_INCLUDE_DIRS :: string.["src/languages/jai/src"];
+
+    BINDINGS  :: #string EOF
+    // Note the proc name in the library uses "Jai", with a capital "J"
+tree_sitter_jai :: () -> *TSLanguage #foreign libtree_sitter_jai "tree_sitter_Jai";
+
+libtree_sitter_jai :: #library,no_dll "bin/x64/libtree-sitter-jai";
+    EOF
+
+    success := false;
+
+    src_files: [..]string;
+    array_add(*src_files, ..BUILD_LANGUAGES_SRC_PATHS);
+
+    includes: [..]string;
+    for BUILD_LANGUAGES_INCLUDE_DIRS {
+        tprint("/I%", it);
+    }
+
+    #if OS == .WINDOWS {
+
+        #if CPU != .X64 {
+            assert("CPU=% isn't currently supported. You might be able to add support for it though!", CPU);
+        }
+
+        make_directory_if_it_does_not_exist("windows/languages/jai/bin/x64", recursive=true);
+
+        success = build_cpp_static_lib("windows/languages/jai/bin/x64/libtree-sitter-jai", ..src_files, extra=includes);
+
+        success &&= write_entire_file("windows/languages/jai/windows.jai", BINDINGS);
+
+    } else #if OS == .LINUX {
+
+        #if CPU != .X64 {
+            assert("CPU=% isn't currently supported. You might be able to add support for it though!", CPU);
+        }
+
+        make_directory_if_it_does_not_exist("linux/languages/jai/bin/x64", recursive=true);
+
+        success = build_cpp_static_lib("linux/languages/jai/bin/x64/libtree-sitter-jai", ..src_files, extra=includes);
+
+        success &&= write_entire_file("linux/languages/jai/linux.jai", BINDINGS);
 
     } else {
         assert(false, "this OS is currently unsupported. You might be able to add support for it though!");

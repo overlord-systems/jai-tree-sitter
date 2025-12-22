@@ -47,6 +47,9 @@ main :: () {
     go_lang := tree_sitter_go();
     assert(go_lang != null, "tree_sitter_go returned null");
 
+    jai_lang := tree_sitter_jai();
+    assert(jai_lang != null, "tree_sitter_jai returned null");
+
     ts_parser_set_language(parser, json_lang);
 
     // Build a syntax tree based on source code stored in a string.
