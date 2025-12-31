@@ -50,6 +50,9 @@ main :: () {
     jai_lang := tree_sitter_jai();
     assert(jai_lang != null, "tree_sitter_jai returned null");
 
+    sql_lang := tree_sitter_sql();
+    assert(sql_lang != null, "tree_sitter_sql returned null");
+
     ts_parser_set_language(parser, json_lang);
 
     // Build a syntax tree based on source code stored in a string.

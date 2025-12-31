@@ -31,6 +31,7 @@ generate_bindings :: (args: []string) -> bool {
     compile_json := array_find(args, "-compile_json");
     compile_go := array_find(args, "-compile_go");
     compile_jai := array_find(args, "-compile_jai");
+    compile_sql := array_find(args, "-compile_sql");
 
     if compile {
         success := compile_tree_sitter();
@@ -49,6 +50,11 @@ generate_bindings :: (args: []string) -> bool {
 
     if compile_jai {
         success := compile_jai_lang();
+        if !success return false;
+    }
+
+    if compile_sql {
+        success := compile_sql_lang();
         if !success return false;
     }
 
@@ -178,6 +184,58 @@ libtree_sitter_json :: #library,no_dll "bin/x64/libtree-sitter-json";
         success = build_cpp_static_lib("linux/languages/json/bin/x64/libtree-sitter-json", ..src_files, extra=includes);
 
         success &&= write_entire_file("linux/languages/json/linux.jai", BINDINGS);
+
+    } else {
+        assert(false, "this OS is currently unsupported. You might be able to add support for it though!");
+    }
+
+    return success;
+}
+
+compile_sql_lang :: () -> ok: bool {
+
+    BUILD_LANGUAGES_SRC_PATHS :: string.["src/languages/sql/src/parser.c", "src/languages/sql/src/scanner.c"];
+    BUILD_LANGUAGES_INCLUDE_DIRS :: string.["src/languages/sql/src"];
+
+    BINDINGS  :: #string EOF
+tree_sitter_sql :: () -> *TSLanguage #foreign libtree_sitter_sql;
+
+libtree_sitter_sql :: #library,no_dll "bin/x64/libtree-sitter-sql";
+    EOF
+
+    success := false;
+
+    src_files: [..]string;
+    array_add(*src_files, ..BUILD_LANGUAGES_SRC_PATHS);
+
+    includes: [..]string;
+    for BUILD_LANGUAGES_INCLUDE_DIRS {
+        tprint("/I%", it);
+    }
+
+    #if OS == .WINDOWS {
+
+        #if CPU != .X64 {
+            assert("CPU=% isn't currently supported. You might be able to add support for it though!", CPU);
+        }
+
+        make_directory_if_it_does_not_exist("windows/languages/sql/bin/x64", recursive=true);
+
+        success = build_cpp_static_lib("windows/languages/sql/bin/x64/libtree-sitter-sql", ..src_files, extra=includes);
+
+        success &&= write_entire_file("windows/languages/sql/windows.jai", BINDINGS);
+
+    } else #if OS == .LINUX {
+
+        #if CPU != .X64 {
+            assert("CPU=% isn't currently supported. You might be able to add support for it though!", CPU);
+        }
+
+        make_directory_if_it_does_not_exist("linux/languages/sql/bin/x64", recursive=true);
+
+        success = build_cpp_static_lib("linux/languages/sql/bin/x64/libtree-sitter-sql", ..src_files, extra=includes);
+
+        success &&= write_entire_file("linux/languages/sql/linux.jai", BINDINGS);
 
     } else {
         assert(false, "this OS is currently unsupported. You might be able to add support for it though!");
