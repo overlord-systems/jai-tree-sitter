@@ -415,7 +415,7 @@ libtree_sitter_dockerfile :: #library,no_dll "bin/x64/libtree-sitter-dockerfile"
 
 compile_yaml_lang :: () -> ok: bool {
 
-    BUILD_LANGUAGES_SRC_PATHS :: string.["src/languages/yaml/src/parser.c", "src/languages/yaml/src/scanner.c"];
+    BUILD_LANGUAGES_SRC_PATHS :: string.["src/languages/yaml/src/parser.c", "src/languages/yaml/src/scanner.c", "src/languages/yaml/src/schema.core.c", "src/languages/yaml/src/schema.json.c", "src/languages/yaml/src/schema.legacy.c"];
     BUILD_LANGUAGES_INCLUDE_DIRS :: string.["src/languages/yaml/src"];
 
     BINDINGS  :: #string EOF
