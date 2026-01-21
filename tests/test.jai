@@ -54,7 +54,10 @@ main :: () {
     assert(sql_lang != null, "tree_sitter_sql returned null");
 
     dockerfile_lang := tree_sitter_dockerfile();
-    assert(sql_lang != null, "tree_sitter_dockerfile returned null");
+    assert(dockerfile_lang != null, "tree_sitter_dockerfile returned null");
+
+    yaml_lang := tree_sitter_yaml();
+    assert(yaml_lang != null, "tree_sitter_yaml returned null");
 
     ts_parser_set_language(parser, json_lang);
 
