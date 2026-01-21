@@ -32,6 +32,7 @@ generate_bindings :: (args: []string) -> bool {
     compile_go := array_find(args, "-compile_go");
     compile_jai := array_find(args, "-compile_jai");
     compile_sql := array_find(args, "-compile_sql");
+    compile_dockerfile := array_find(args, "-compile_dockerfile");
 
     if compile {
         success := compile_tree_sitter();
@@ -55,6 +56,11 @@ generate_bindings :: (args: []string) -> bool {
 
     if compile_sql {
         success := compile_sql_lang();
+        if !success return false;
+    }
+
+    if compile_dockerfile {
+        success := compile_dockerfile_lang();
         if !success return false;
     }
 
@@ -341,6 +347,58 @@ libtree_sitter_jai :: #library,no_dll "bin/x64/libtree-sitter-jai";
         success = build_cpp_static_lib("linux/languages/jai/bin/x64/libtree-sitter-jai", ..src_files, extra=includes);
 
         success &&= write_entire_file("linux/languages/jai/linux.jai", BINDINGS);
+
+    } else {
+        assert(false, "this OS is currently unsupported. You might be able to add support for it though!");
+    }
+
+    return success;
+}
+
+compile_dockerfile_lang :: () -> ok: bool {
+
+    BUILD_LANGUAGES_SRC_PATHS :: string.["src/languages/dockerfile/src/parser.c", "src/languages/dockerfile/src/scanner.c"];
+    BUILD_LANGUAGES_INCLUDE_DIRS :: string.["src/languages/dockerfile/src"];
+
+    BINDINGS  :: #string EOF
+tree_sitter_dockerfile :: () -> *TSLanguage #foreign libtree_sitter_dockerfile;
+
+libtree_sitter_dockerfile :: #library,no_dll "bin/x64/libtree-sitter-dockerfile";
+    EOF
+
+    success := false;
+
+    src_files: [..]string;
+    array_add(*src_files, ..BUILD_LANGUAGES_SRC_PATHS);
+
+    includes: [..]string;
+    for BUILD_LANGUAGES_INCLUDE_DIRS {
+        tprint("/I%", it);
+    }
+
+    #if OS == .WINDOWS {
+
+        #if CPU != .X64 {
+            assert("CPU=% isn't currently supported. You might be able to add support for it though!", CPU);
+        }
+
+        make_directory_if_it_does_not_exist("windows/languages/dockerfile/bin/x64", recursive=true);
+
+        success = build_cpp_static_lib("windows/languages/dockerfile/bin/x64/libtree-sitter-dockerfile", ..src_files, extra=includes);
+
+        success &&= write_entire_file("windows/languages/dockerfile/windows.jai", BINDINGS);
+
+    } else #if OS == .LINUX {
+
+        #if CPU != .X64 {
+            assert("CPU=% isn't currently supported. You might be able to add support for it though!", CPU);
+        }
+
+        make_directory_if_it_does_not_exist("linux/languages/dockerfile/bin/x64", recursive=true);
+
+        success = build_cpp_static_lib("linux/languages/dockerfile/bin/x64/libtree-sitter-dockerfile", ..src_files, extra=includes);
+
+        success &&= write_entire_file("linux/languages/dockerfile/linux.jai", BINDINGS);
 
     } else {
         assert(false, "this OS is currently unsupported. You might be able to add support for it though!");

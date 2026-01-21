@@ -53,6 +53,9 @@ main :: () {
     sql_lang := tree_sitter_sql();
     assert(sql_lang != null, "tree_sitter_sql returned null");
 
+    dockerfile_lang := tree_sitter_dockerfile();
+    assert(sql_lang != null, "tree_sitter_dockerfile returned null");
+
     ts_parser_set_language(parser, json_lang);
 
     // Build a syntax tree based on source code stored in a string.
