@@ -59,6 +59,9 @@ main :: () {
     yaml_lang := tree_sitter_yaml();
     assert(yaml_lang != null, "tree_sitter_yaml returned null");
 
+    c_lang := tree_sitter_c();
+    assert(c_lang != null, "tree_sitter_c returned null");
+
     ts_parser_set_language(parser, json_lang);
 
     // Build a syntax tree based on source code stored in a string.

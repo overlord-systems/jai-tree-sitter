@@ -1,7 +1,7 @@
 //
 // This file was auto-generated using the following command:
 //
-// jai generate.jai - -compile_jai
+// jai generate.jai - -compile_c
 //
 
 

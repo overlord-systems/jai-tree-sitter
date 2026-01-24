@@ -9,6 +9,7 @@
     #load "windows/languages/sql/windows.jai";
     #load "windows/languages/dockerfile/windows.jai";
     #load "windows/languages/yaml/windows.jai";
+    #load "windows/languages/c/windows.jai";
 
 } else #if OS == .LINUX {
     #load "linux/linux.jai";
@@ -18,6 +19,7 @@
     #load "linux/languages/sql/linux.jai";
     #load "linux/languages/dockerfile/linux.jai";
     #load "linux/languages/yaml/linux.jai";
+    #load "linux/languages/c/linux.jai";
 } else {
     #assert false "this OS is not currently supported by tree-sitter. You must generate bindings for it. Check the README for information.";
 }
