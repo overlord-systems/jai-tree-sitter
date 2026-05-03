@@ -165,6 +165,7 @@ compile_tree_sitter :: () -> ok: bool {
         success = build_cpp_static_lib("macos/bin/arm64/libtree-sitter", ..src_files, extra=.[
             tprint("-I%", BUILD_INCLUDE_DIRS[0]),
             tprint("-I%", BUILD_INCLUDE_DIRS[1]),
+            "-mmacosx-version-min=11.0",
         ]);
 
     } else {
@@ -227,6 +228,7 @@ tree_sitter_json :: () -> *TSLanguage #foreign libtree_sitter_json;
 
         make_directory_if_it_does_not_exist("macos/languages/json/bin/arm64", recursive=true);
 
+        array_add(*includes, "-mmacosx-version-min=11.0");
         success = build_cpp_static_lib("macos/languages/json/bin/arm64/libtree-sitter-json", ..src_files, extra=includes);
 
         success &&= write_entire_file("macos/languages/json/macos.jai", BINDINGS);
@@ -291,6 +293,7 @@ tree_sitter_sql :: () -> *TSLanguage #foreign libtree_sitter_sql;
 
         make_directory_if_it_does_not_exist("macos/languages/sql/bin/arm64", recursive=true);
 
+        array_add(*includes, "-mmacosx-version-min=11.0");
         success = build_cpp_static_lib("macos/languages/sql/bin/arm64/libtree-sitter-sql", ..src_files, extra=includes);
 
         success &&= write_entire_file("macos/languages/sql/macos.jai", BINDINGS);
@@ -355,6 +358,7 @@ tree_sitter_go :: () -> *TSLanguage #foreign libtree_sitter_go;
 
         make_directory_if_it_does_not_exist("macos/languages/go/bin/arm64", recursive=true);
 
+        array_add(*includes, "-mmacosx-version-min=11.0");
         success = build_cpp_static_lib("macos/languages/go/bin/arm64/libtree-sitter-go", ..src_files, extra=includes);
 
         success &&= write_entire_file("macos/languages/go/macos.jai", BINDINGS);
@@ -420,6 +424,7 @@ tree_sitter_jai :: () -> *TSLanguage #foreign libtree_sitter_jai "tree_sitter_Ja
 
         make_directory_if_it_does_not_exist("macos/languages/jai/bin/arm64", recursive=true);
 
+        array_add(*includes, "-mmacosx-version-min=11.0");
         success = build_cpp_static_lib("macos/languages/jai/bin/arm64/libtree-sitter-jai", ..src_files, extra=includes);
 
         success &&= write_entire_file("macos/languages/jai/macos.jai", BINDINGS);
@@ -484,6 +489,7 @@ tree_sitter_dockerfile :: () -> *TSLanguage #foreign libtree_sitter_dockerfile;
 
         make_directory_if_it_does_not_exist("macos/languages/dockerfile/bin/arm64", recursive=true);
 
+        array_add(*includes, "-mmacosx-version-min=11.0");
         success = build_cpp_static_lib("macos/languages/dockerfile/bin/arm64/libtree-sitter-dockerfile", ..src_files, extra=includes);
 
         success &&= write_entire_file("macos/languages/dockerfile/macos.jai", BINDINGS);
@@ -548,6 +554,7 @@ tree_sitter_yaml :: () -> *TSLanguage #foreign libtree_sitter_yaml;
 
         make_directory_if_it_does_not_exist("macos/languages/yaml/bin/arm64", recursive=true);
 
+        array_add(*includes, "-mmacosx-version-min=11.0");
         success = build_cpp_static_lib("macos/languages/yaml/bin/arm64/libtree-sitter-yaml", ..src_files, extra=includes);
 
         success &&= write_entire_file("macos/languages/yaml/macos.jai", BINDINGS);
@@ -612,6 +619,7 @@ tree_sitter_c :: () -> *TSLanguage #foreign libtree_sitter_c;
 
         make_directory_if_it_does_not_exist("macos/languages/c/bin/arm64", recursive=true);
 
+        array_add(*includes, "-mmacosx-version-min=11.0");
         success = build_cpp_static_lib("macos/languages/c/bin/arm64/libtree-sitter-c", ..src_files, extra=includes);
 
         success &&= write_entire_file("macos/languages/c/macos.jai", BINDINGS);
