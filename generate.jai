@@ -28,6 +28,7 @@ ENUMS_TO_OMIT :: string.[
 generate_bindings :: (args: []string) -> bool {
 
     compile := array_find(args, "-compile");
+    compile_all_langs := array_find(args, "-compile_all_langs");
     compile_json := array_find(args, "-compile_json");
     compile_go := array_find(args, "-compile_go");
     compile_jai := array_find(args, "-compile_jai");
@@ -41,37 +42,37 @@ generate_bindings :: (args: []string) -> bool {
         if !success return false;
     }
 
-    if compile_json {
+    if compile_json || compile_all_langs {
         success := compile_json_lang();
         if !success return false;
     }
 
-    if compile_go {
+    if compile_go || compile_all_langs {
         success := compile_go_lang();
         if !success return false;
     }
 
-    if compile_jai {
+    if compile_jai || compile_all_langs {
         success := compile_jai_lang();
         if !success return false;
     }
 
-    if compile_sql {
+    if compile_sql || compile_all_langs {
         success := compile_sql_lang();
         if !success return false;
     }
 
-    if compile_dockerfile {
+    if compile_dockerfile || compile_all_langs {
         success := compile_dockerfile_lang();
         if !success return false;
     }
 
-    if compile_yaml {
+    if compile_yaml || compile_all_langs {
         success := compile_yaml_lang();
         if !success return false;
     }
 
-    if compile_c {
+    if compile_c || compile_all_langs {
         success := compile_c_lang();
         if !success return false;
     }
@@ -107,9 +108,15 @@ generate_bindings :: (args: []string) -> bool {
         opts.footer = FOOTER_LINUX;
         opts.generate_library_declarations = false;
 
-    } /*else #if OS == .MACOS {
+    } else #if OS == .MACOS {
+
         output_filename = "macos/macos.jai";
-    }*/ else {
+        array_add(*opts.library_search_paths, "macos/bin/arm64");
+
+        opts.footer = FOOTER_MACOS;
+        opts.generate_library_declarations = false;
+
+    } else {
         assert(false, "this OS is currently unsupported. You might be able to add support for it though!");
     }
 
@@ -151,6 +158,15 @@ compile_tree_sitter :: () -> ok: bool {
             tprint("-I%", BUILD_INCLUDE_DIRS[0]),
             tprint("-I%", BUILD_INCLUDE_DIRS[1]),
         ]);
+    } else #if OS == .MACOS {
+
+        make_directory_if_it_does_not_exist("macos/bin/arm64", recursive=true);
+
+        success = build_cpp_static_lib("macos/bin/arm64/libtree-sitter", ..src_files, extra=.[
+            tprint("-I%", BUILD_INCLUDE_DIRS[0]),
+            tprint("-I%", BUILD_INCLUDE_DIRS[1]),
+        ]);
+
     } else {
         assert(false, "this OS is currently unsupported. You might be able to add support for it though!");
     }
@@ -166,7 +182,11 @@ compile_json_lang :: () -> ok: bool {
     BINDINGS  :: #string EOF
 tree_sitter_json :: () -> *TSLanguage #foreign libtree_sitter_json;
 
-libtree_sitter_json :: #library,no_dll "bin/x64/libtree-sitter-json";
+#if CPU == .X64 {
+    libtree_sitter_json :: #library,no_dll "bin/x64/libtree-sitter-json";
+} else #if CPU == .ARM64 {
+    libtree_sitter_json :: #library,no_dll "bin/arm64/libtree-sitter-json";
+}
     EOF
 
     success := false;
@@ -203,6 +223,14 @@ libtree_sitter_json :: #library,no_dll "bin/x64/libtree-sitter-json";
 
         success &&= write_entire_file("linux/languages/json/linux.jai", BINDINGS);
 
+    } else #if OS == .MACOS {
+
+        make_directory_if_it_does_not_exist("macos/languages/json/bin/arm64", recursive=true);
+
+        success = build_cpp_static_lib("macos/languages/json/bin/arm64/libtree-sitter-json", ..src_files, extra=includes);
+
+        success &&= write_entire_file("macos/languages/json/macos.jai", BINDINGS);
+
     } else {
         assert(false, "this OS is currently unsupported. You might be able to add support for it though!");
     }
@@ -218,7 +246,11 @@ compile_sql_lang :: () -> ok: bool {
     BINDINGS  :: #string EOF
 tree_sitter_sql :: () -> *TSLanguage #foreign libtree_sitter_sql;
 
-libtree_sitter_sql :: #library,no_dll "bin/x64/libtree-sitter-sql";
+#if CPU == .X64 {
+    libtree_sitter_sql :: #library,no_dll "bin/x64/libtree-sitter-sql";
+} else #if CPU == .ARM64 {
+    libtree_sitter_sql :: #library,no_dll "bin/arm64/libtree-sitter-sql";
+}
     EOF
 
     success := false;
@@ -255,6 +287,14 @@ libtree_sitter_sql :: #library,no_dll "bin/x64/libtree-sitter-sql";
 
         success &&= write_entire_file("linux/languages/sql/linux.jai", BINDINGS);
 
+    } else #if OS == .MACOS {
+
+        make_directory_if_it_does_not_exist("macos/languages/sql/bin/arm64", recursive=true);
+
+        success = build_cpp_static_lib("macos/languages/sql/bin/arm64/libtree-sitter-sql", ..src_files, extra=includes);
+
+        success &&= write_entire_file("macos/languages/sql/macos.jai", BINDINGS);
+
     } else {
         assert(false, "this OS is currently unsupported. You might be able to add support for it though!");
     }
@@ -270,7 +310,11 @@ compile_go_lang :: () -> ok: bool {
     BINDINGS  :: #string EOF
 tree_sitter_go :: () -> *TSLanguage #foreign libtree_sitter_go;
 
-libtree_sitter_go :: #library,no_dll "bin/x64/libtree-sitter-go";
+#if CPU == .X64 {
+    libtree_sitter_go :: #library,no_dll "bin/x64/libtree-sitter-go";
+} else #if CPU == .ARM64 {
+    libtree_sitter_go :: #library,no_dll "bin/arm64/libtree-sitter-go";
+}
     EOF
 
     success := false;
@@ -307,6 +351,14 @@ libtree_sitter_go :: #library,no_dll "bin/x64/libtree-sitter-go";
 
         success &&= write_entire_file("linux/languages/go/linux.jai", BINDINGS);
 
+    } else #if OS == .MACOS {
+
+        make_directory_if_it_does_not_exist("macos/languages/go/bin/arm64", recursive=true);
+
+        success = build_cpp_static_lib("macos/languages/go/bin/arm64/libtree-sitter-go", ..src_files, extra=includes);
+
+        success &&= write_entire_file("macos/languages/go/macos.jai", BINDINGS);
+
     } else {
         assert(false, "this OS is currently unsupported. You might be able to add support for it though!");
     }
@@ -323,7 +375,11 @@ compile_jai_lang :: () -> ok: bool {
 // Note the proc name in the library uses "Jai", with a capital "J"
 tree_sitter_jai :: () -> *TSLanguage #foreign libtree_sitter_jai "tree_sitter_Jai";
 
-libtree_sitter_jai :: #library,no_dll "bin/x64/libtree-sitter-jai";
+#if CPU == .X64 {
+    libtree_sitter_jai :: #library,no_dll "bin/x64/libtree-sitter-jai";
+} else #if CPU == .ARM64 {
+    libtree_sitter_jai :: #library,no_dll "bin/arm64/libtree-sitter-jai";
+}
     EOF
 
     success := false;
@@ -360,6 +416,14 @@ libtree_sitter_jai :: #library,no_dll "bin/x64/libtree-sitter-jai";
 
         success &&= write_entire_file("linux/languages/jai/linux.jai", BINDINGS);
 
+    } else #if OS == .MACOS {
+
+        make_directory_if_it_does_not_exist("macos/languages/jai/bin/arm64", recursive=true);
+
+        success = build_cpp_static_lib("macos/languages/jai/bin/arm64/libtree-sitter-jai", ..src_files, extra=includes);
+
+        success &&= write_entire_file("macos/languages/jai/macos.jai", BINDINGS);
+
     } else {
         assert(false, "this OS is currently unsupported. You might be able to add support for it though!");
     }
@@ -375,7 +439,11 @@ compile_dockerfile_lang :: () -> ok: bool {
     BINDINGS  :: #string EOF
 tree_sitter_dockerfile :: () -> *TSLanguage #foreign libtree_sitter_dockerfile;
 
-libtree_sitter_dockerfile :: #library,no_dll "bin/x64/libtree-sitter-dockerfile";
+#if CPU == .X64 {
+    libtree_sitter_dockerfile :: #library,no_dll "bin/x64/libtree-sitter-dockerfile";
+} else #if CPU == .ARM64 {
+    libtree_sitter_dockerfile :: #library,no_dll "bin/arm64/libtree-sitter-dockerfile";
+}
     EOF
 
     success := false;
@@ -412,6 +480,14 @@ libtree_sitter_dockerfile :: #library,no_dll "bin/x64/libtree-sitter-dockerfile"
 
         success &&= write_entire_file("linux/languages/dockerfile/linux.jai", BINDINGS);
 
+    } else #if OS == .MACOS {
+
+        make_directory_if_it_does_not_exist("macos/languages/dockerfile/bin/arm64", recursive=true);
+
+        success = build_cpp_static_lib("macos/languages/dockerfile/bin/arm64/libtree-sitter-dockerfile", ..src_files, extra=includes);
+
+        success &&= write_entire_file("macos/languages/dockerfile/macos.jai", BINDINGS);
+
     } else {
         assert(false, "this OS is currently unsupported. You might be able to add support for it though!");
     }
@@ -427,7 +503,11 @@ compile_yaml_lang :: () -> ok: bool {
     BINDINGS  :: #string EOF
 tree_sitter_yaml :: () -> *TSLanguage #foreign libtree_sitter_yaml;
 
-libtree_sitter_yaml :: #library,no_dll "bin/x64/libtree-sitter-yaml";
+#if CPU == .X64 {
+    libtree_sitter_yaml :: #library,no_dll "bin/x64/libtree-sitter-yaml";
+} else #if CPU == .ARM64 {
+    libtree_sitter_yaml :: #library,no_dll "bin/arm64/libtree-sitter-yaml";
+}
     EOF
 
     success := false;
@@ -464,6 +544,14 @@ libtree_sitter_yaml :: #library,no_dll "bin/x64/libtree-sitter-yaml";
 
         success &&= write_entire_file("linux/languages/yaml/linux.jai", BINDINGS);
 
+    } else #if OS == .MACOS {
+
+        make_directory_if_it_does_not_exist("macos/languages/yaml/bin/arm64", recursive=true);
+
+        success = build_cpp_static_lib("macos/languages/yaml/bin/arm64/libtree-sitter-yaml", ..src_files, extra=includes);
+
+        success &&= write_entire_file("macos/languages/yaml/macos.jai", BINDINGS);
+
     } else {
         assert(false, "this OS is currently unsupported. You might be able to add support for it though!");
     }
@@ -479,7 +567,11 @@ compile_c_lang :: () -> ok: bool {
     BINDINGS  :: #string EOF
 tree_sitter_c :: () -> *TSLanguage #foreign libtree_sitter_c;
 
-libtree_sitter_c :: #library,no_dll "bin/x64/libtree-sitter-c";
+#if CPU == .X64 {
+    libtree_sitter_c :: #library,no_dll "bin/x64/libtree-sitter-c";
+} else #if CPU == .ARM64 {
+    libtree_sitter_c :: #library,no_dll "bin/arm64/libtree-sitter-c";
+}
     EOF
 
     success := false;
@@ -516,6 +608,14 @@ libtree_sitter_c :: #library,no_dll "bin/x64/libtree-sitter-c";
 
         success &&= write_entire_file("linux/languages/c/linux.jai", BINDINGS);
 
+    } else #if OS == .MACOS {
+
+        make_directory_if_it_does_not_exist("macos/languages/c/bin/arm64", recursive=true);
+
+        success = build_cpp_static_lib("macos/languages/c/bin/arm64/libtree-sitter-c", ..src_files, extra=includes);
+
+        success &&= write_entire_file("macos/languages/c/macos.jai", BINDINGS);
+
     } else {
         assert(false, "this OS is currently unsupported. You might be able to add support for it though!");
     }
@@ -543,4 +643,8 @@ END
 
 FOOTER_LINUX :: #string END
 libtree_sitter :: #library,no_dll "bin/x64/libtree-sitter";
+END
+
+FOOTER_MACOS :: #string END
+libtree_sitter :: #library,no_dll "bin/arm64/libtree-sitter";
 END
