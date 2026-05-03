@@ -3,3 +3,4 @@
 *.rdi
 *.exe
 tests/test
+*.dSYM
